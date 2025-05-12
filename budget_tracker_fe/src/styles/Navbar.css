@@ -1,0 +1,39 @@
+/* Navbar Container */
+.navbar-container {
+  background-color: #000000;
+  border-bottom: 1px solid #ddd;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+/* Left side (navigation links) */
+.navbar-left ul {
+  list-style-type: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar-left li {
+  display: inline;
+}
+
+.navbar-left a,
+.navbar-left button {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.navbar-left a:hover,
+.navbar-left button:hover {
+  color: #007bff;
+}

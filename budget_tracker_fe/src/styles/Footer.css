@@ -1,0 +1,34 @@
+/* Footer Wrapper */
+.footer-wrapper {
+  background-color: #f8f8f8;
+  border-top: 1px solid #ddd;
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Footer Inner Container */
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Footer Links */
+.footer-links {
+  list-style: none;
+  padding: 8px 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 0;
+}
+
+.footer-links li a {
+  text-decoration: none;
+  color: #333;
+}
+
+.footer-links li a:hover {
+  color: #007bff;
+}

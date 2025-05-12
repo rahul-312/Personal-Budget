@@ -1,0 +1,134 @@
+.budgets-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.budgets-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.toggle-button {
+  width: auto;
+  margin-bottom: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-button:hover {
+  background-color: #0056b3;
+}
+
+.budget-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.budget-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.budget-button {
+  padding: 10px;
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.budget-button:hover {
+  background-color: #218838;
+}
+
+.budget-table-wrapper {
+  overflow-x: auto;
+}
+
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.budget-table th,
+.budget-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.budget-table th {
+  background-color: #007bff;
+  color: white;
+}
+
+.action-col {
+  text-align: right;
+  width: 150px;
+}
+
+.action-buttons {
+  text-align: right;
+}
+
+.budget-edit-button,
+.budget-delete-button {
+  font-size: 12px;
+  padding: 4px 8px;
+  margin-left: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+.budget-edit-button {
+  background-color: #ffc107;
+}
+
+.budget-edit-button:hover {
+  background-color: #e0a800;
+}
+
+.budget-delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.budget-delete-button:hover {
+  background-color: #c82333;
+}
+
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.icon-button.edit {
+  color: #007bff;
+}
+
+.icon-button.delete {
+  color: #dc3545;
+}
+
+.icon-button:hover {
+  opacity: 0.8;
+}
