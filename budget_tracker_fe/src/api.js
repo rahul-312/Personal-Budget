@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = "https://budget-tracker-be-1.onrender.com";
+const BASE_URL = "https://budget-tracker-be-1.onrender.com/";
 
 // API endpoints
 export const API = {
