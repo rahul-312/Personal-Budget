@@ -9,9 +9,11 @@ import { useNavigate } from 'react-router-dom';
 import SweetAlert from 'sweetalert2';
 import './Transactions.css';
 
+// TransactionsPage component to manage listing, creating, and deleting transactions
 const TransactionsPage = () => {
   const navigate = useNavigate();
 
+  // State hooks
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [newTransaction, setNewTransaction] = useState({
@@ -20,14 +22,16 @@ const TransactionsPage = () => {
     description: '',
     date: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [showList, setShowList] = useState(false);
+  const [loading, setLoading] = useState(false);         // Tracks loading state for API calls
+  const [showList, setShowList] = useState(false);       // Toggles between transaction form and list
 
+  // Load transactions and categories on component mount
   useEffect(() => {
     loadTransactions();
     loadCategories();
   }, []);
 
+  // Fetch all transactions from the server
   const loadTransactions = async () => {
     setLoading(true);
     try {
@@ -44,6 +48,7 @@ const TransactionsPage = () => {
     }
   };
 
+  // Fetch all available categories from the server
   const loadCategories = async () => {
     try {
       const data = await fetchCategories();
@@ -57,6 +62,7 @@ const TransactionsPage = () => {
     }
   };
 
+  // Handle input change for form fields
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewTransaction({
@@ -65,6 +71,7 @@ const TransactionsPage = () => {
     });
   };
 
+  // Handle submission of new transaction
   const handleCreateTransaction = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -75,9 +82,10 @@ const TransactionsPage = () => {
         title: 'Success',
         text: 'Transaction created and budget updated!',
       });
+      // Reset form after success
       setNewTransaction({ amount: '', category: '', description: '', date: '' });
-      loadTransactions();
-      setShowList(true);
+      loadTransactions(); // Refresh list
+      setShowList(true);  // Switch to list view
     } catch (err) {
       SweetAlert.fire({
         icon: 'error',
@@ -89,6 +97,7 @@ const TransactionsPage = () => {
     }
   };
 
+  // Handle deletion of a transaction
   const handleDeleteTransaction = async (id) => {
     const result = await SweetAlert.fire({
       title: 'Are you sure?',
@@ -108,7 +117,7 @@ const TransactionsPage = () => {
           title: 'Deleted',
           text: 'Transaction deleted successfully.',
         });
-        loadTransactions();
+        loadTransactions(); // Refresh list
       } catch (err) {
         SweetAlert.fire({
           icon: 'error',
@@ -119,18 +128,22 @@ const TransactionsPage = () => {
     }
   };
 
+  // Navigate to the edit transaction page
   const handleEditTransaction = (id) => {
     navigate(`/transactions/${id}/edit`);
   };
 
+  // Render the TransactionsPage UI
   return (
     <div className="transactions-container">
       <h1>Transactions</h1>
 
+      {/* Toggle button to switch between form and list */}
       <button onClick={() => setShowList(!showList)} className="toggle-button">
         {showList ? 'Add New Transaction' : 'Transactions List'}
       </button>
 
+      {/* Show transaction list */}
       {showList ? (
         <>
           <h2>Transaction List</h2>
@@ -156,6 +169,7 @@ const TransactionsPage = () => {
                       <td>{transaction.description}</td>
                       <td>{new Date(transaction.date).toLocaleDateString()}</td>
                       <td>
+                        {/* Edit Button */}
                         <button
                           className="icon-button edit"
                           onClick={() => handleEditTransaction(transaction.id)}
@@ -163,6 +177,8 @@ const TransactionsPage = () => {
                         >
                           <i className="fa fa-pencil" aria-hidden="true"></i>
                         </button>
+
+                        {/* Delete Button */}
                         <button
                           className="icon-button delete"
                           onClick={() => handleDeleteTransaction(transaction.id)}
@@ -183,9 +199,11 @@ const TransactionsPage = () => {
           )}
         </>
       ) : (
+        // Show transaction creation form
         <>
           <h2>Create New Transaction</h2>
           <form onSubmit={handleCreateTransaction}>
+            {/* Amount Field */}
             <div>
               <label htmlFor="amount">Amount:</label>
               <input
@@ -198,6 +216,7 @@ const TransactionsPage = () => {
               />
             </div>
 
+            {/* Category Field */}
             <div>
               <label htmlFor="category">Category:</label>
               <select
@@ -216,6 +235,7 @@ const TransactionsPage = () => {
               </select>
             </div>
 
+            {/* Description Field */}
             <div>
               <label htmlFor="description">Description:</label>
               <input
@@ -228,6 +248,7 @@ const TransactionsPage = () => {
               />
             </div>
 
+            {/* Date Field */}
             <div>
               <label htmlFor="date">Date:</label>
               <input
@@ -240,6 +261,7 @@ const TransactionsPage = () => {
               />
             </div>
 
+            {/* Submit Button */}
             <button type="submit" disabled={loading}>
               {loading ? 'Creating...' : 'Create Transaction'}
             </button>

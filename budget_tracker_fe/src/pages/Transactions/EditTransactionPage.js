@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+// API functions
 import { fetchTransactionById, updateTransaction, fetchCategories } from '../../api';
+// Styles
 import './EditTransactionPage.css';
 
 const EditTransactionPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams();              // Get transaction ID from route parameters
+  const navigate = useNavigate();          // Used for navigation after update
 
-  const [transaction, setTransaction] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  // Component state
+  const [transaction, setTransaction] = useState(null); // Holds transaction details
+  const [categories, setCategories] = useState([]);     // Holds available category options
+  const [loading, setLoading] = useState(false);        // Controls loading state
+  const [error, setError] = useState('');               // Error message to display
+  const [successMessage, setSuccessMessage] = useState(''); // Success message
 
+  // Load data on mount and when ID changes
   useEffect(() => {
     loadTransaction();
     loadCategories();
   }, [id]);
 
+  // Fetch transaction details by ID
   const loadTransaction = async () => {
     setLoading(true);
     try {
@@ -30,6 +35,7 @@ const EditTransactionPage = () => {
     }
   };
 
+  // Fetch all available categories
   const loadCategories = async () => {
     try {
       const data = await fetchCategories();
@@ -39,6 +45,7 @@ const EditTransactionPage = () => {
     }
   };
 
+  // Handle input field changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTransaction({
@@ -47,14 +54,15 @@ const EditTransactionPage = () => {
     });
   };
 
+  // Handle form submission to update the transaction
   const handleUpdateTransaction = async (e) => {
-    e.preventDefault();
+    e.preventDefault();           // Prevent form default reload behavior
     setLoading(true);
     setSuccessMessage('');
     try {
       await updateTransaction(id, transaction);
       setSuccessMessage('Transaction updated successfully!');
-      navigate('/transactions'); // Navigate back to the transactions list
+      navigate('/transactions'); // Redirect to transactions list after update
     } catch (err) {
       setError('Error updating transaction.');
     } finally {
@@ -62,15 +70,20 @@ const EditTransactionPage = () => {
     }
   };
 
+  // Display loading state
   if (loading) return <p>Loading...</p>;
 
   return (
     <div>
       <h1>Edit Transaction</h1>
+
+      {/* Error and Success Messages */}
       {error && <p className="error">{error}</p>}
       {successMessage && <p className="success">{successMessage}</p>}
 
+      {/* Transaction Edit Form */}
       <form onSubmit={handleUpdateTransaction}>
+        {/* Amount Field */}
         <div>
           <label htmlFor="amount">Amount:</label>
           <input
@@ -83,6 +96,7 @@ const EditTransactionPage = () => {
           />
         </div>
 
+        {/* Category Dropdown */}
         <div>
           <label htmlFor="category">Category:</label>
           <select
@@ -101,6 +115,7 @@ const EditTransactionPage = () => {
           </select>
         </div>
 
+        {/* Description Field */}
         <div>
           <label htmlFor="description">Description:</label>
           <input
@@ -113,6 +128,7 @@ const EditTransactionPage = () => {
           />
         </div>
 
+        {/* Date Picker */}
         <div>
           <label htmlFor="date">Date:</label>
           <input
@@ -125,6 +141,7 @@ const EditTransactionPage = () => {
           />
         </div>
 
+        {/* Submit Button */}
         <button type="submit" disabled={loading}>
           {loading ? 'Updating...' : 'Update Transaction'}
         </button>

@@ -6,16 +6,19 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './Budget.css';
 
 const Budgets = () => {
-  const [budgets, setBudgets] = useState([]);
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(null);
-  const [showList, setShowList] = useState(false); // Toggle state
+  // State variables
+  const [budgets, setBudgets] = useState([]); // Stores fetched budget data
+  const [amount, setAmount] = useState(''); // Input state for budget amount
+  const [date, setDate] = useState(null); // Input state for selected month/year
+  const [showList, setShowList] = useState(false); // Toggles between add form and list view
 
+  // Function to load budgets from API
   const loadBudgets = async () => {
     try {
       const data = await fetchBudgets();
       setBudgets(data);
     } catch (err) {
+      // Show error alert if fetching fails
       SweetAlert.fire({
         icon: 'error',
         title: 'Error',
@@ -24,9 +27,11 @@ const Budgets = () => {
     }
   };
 
+  // Handles budget creation form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Input validation
     if (!amount || !date) {
       SweetAlert.fire({
         icon: 'warning',
@@ -40,16 +45,19 @@ const Budgets = () => {
     const year = date.getFullYear();
 
     try {
-      await createBudget({ amount, month, year });
+      await createBudget({ amount, month, year }); // API call to create budget
       setAmount('');
       setDate(null);
+
       SweetAlert.fire({
         icon: 'success',
         title: 'Budget Created',
         text: 'Your budget has been successfully created.',
       });
-      loadBudgets();
+
+      loadBudgets(); // Reload the updated budget list
     } catch (err) {
+      // Show error if creation fails
       SweetAlert.fire({
         icon: 'error',
         title: 'Error',
@@ -58,6 +66,7 @@ const Budgets = () => {
     }
   };
 
+  // Handles updating a budget
   const handleUpdate = async (budgetId) => {
     const { value: newAmount } = await SweetAlert.fire({
       title: 'Update Budget Amount',
@@ -77,13 +86,14 @@ const Budgets = () => {
     if (!newAmount) return;
 
     try {
-      await updateBudget(budgetId, { amount: newAmount });
+      await updateBudget(budgetId, { amount: newAmount }); // API call to update budget
       SweetAlert.fire({
         icon: 'success',
         title: 'Budget Updated',
         text: 'Your budget has been updated successfully.',
       });
-      loadBudgets();
+
+      loadBudgets(); // Reload updated list
     } catch (err) {
       SweetAlert.fire({
         icon: 'error',
@@ -93,6 +103,7 @@ const Budgets = () => {
     }
   };
 
+  // Handles deleting a budget
   const handleDelete = async (budgetId) => {
     const result = await SweetAlert.fire({
       title: 'Are you sure?',
@@ -106,13 +117,14 @@ const Budgets = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteBudget(budgetId);
+        await deleteBudget(budgetId); // API call to delete budget
         SweetAlert.fire({
           icon: 'success',
           title: 'Deleted!',
           text: 'The budget has been deleted.',
         });
-        loadBudgets();
+
+        loadBudgets(); // Reload updated list
       } catch (err) {
         SweetAlert.fire({
           icon: 'error',
@@ -123,6 +135,7 @@ const Budgets = () => {
     }
   };
 
+  // Load budgets on component mount
   useEffect(() => {
     loadBudgets();
   }, []);
@@ -131,10 +144,12 @@ const Budgets = () => {
     <div className="budgets-container">
       <h2 className="budgets-title">Budgets</h2>
 
+      {/* Toggle between form and list view */}
       <button className="toggle-button" onClick={() => setShowList(!showList)}>
         {showList ? 'Add Budget' : 'Budget List'}
       </button>
 
+      {/* Budget creation form */}
       {!showList && (
         <form className="budget-form" onSubmit={handleSubmit}>
           <input
@@ -158,6 +173,7 @@ const Budgets = () => {
         </form>
       )}
 
+      {/* Budget list table */}
       {showList && (
         <div className="budget-table-wrapper">
           <table className="budget-table">
@@ -174,6 +190,7 @@ const Budgets = () => {
                   <td>{budget.amount}</td>
                   <td>{budget.month}/{budget.year}</td>
                   <td className="action-buttons">
+                    {/* Edit Button */}
                     <button
                       className="icon-button edit"
                       onClick={() => handleUpdate(budget.id)}
@@ -181,6 +198,7 @@ const Budgets = () => {
                     >
                       <i className="fa fa-pencil" aria-hidden="true"></i>
                     </button>
+                    {/* Delete Button */}
                     <button
                       className="icon-button delete"
                       onClick={() => handleDelete(budget.id)}
