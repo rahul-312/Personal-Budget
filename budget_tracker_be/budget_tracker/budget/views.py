@@ -12,32 +12,30 @@ from decimal import Decimal
 from django.db.models.functions import TruncMonth
 from django.db.models import Sum
 
+
 class CategoryChoicesView(APIView):
     """
-    API view to retrieve the available transaction categories.
+    Retrieve all available transaction category choices.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         """
-        Returns a list of available categories for transactions.
+        Return a list of all predefined category choices.
         """
-        choices = [
-            {"value": choice[0], "label": choice[1]}
-            for choice in CategoryType.choices
-        ]
+        choices = [{"value": choice[0], "label": choice[1]} for choice in CategoryType.choices]
         return Response(choices)
+
 
 class TransactionView(APIView):
     """
-    API view for managing transactions.
-    Allows for creating, retrieving, updating, and deleting transactions.
+    Create, retrieve, update, or delete user transactions and update the associated monthly budget accordingly.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, transaction_id=None, *args, **kwargs):
         """
-        Retrieves a specific transaction or all transactions for the authenticated user.
+        Retrieve a single transaction by ID or all transactions for the authenticated user.
         """
         if transaction_id:
             try:
@@ -45,7 +43,7 @@ class TransactionView(APIView):
                 serializer = TransactionSerializer(transaction)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Transaction.DoesNotExist:
-                raise NotFound(detail="Transaction not found.")
+                raise NotFound("Transaction not found.")
         else:
             transactions = Transaction.objects.filter(user=request.user)
             serializer = TransactionSerializer(transactions, many=True)
@@ -53,7 +51,7 @@ class TransactionView(APIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Creates a new transaction and updates the associated budget for the current month.
+        Create a new transaction and update the user's current monthly budget spent amount.
         """
         serializer = TransactionSerializer(data=request.data)
         if serializer.is_valid():
@@ -81,7 +79,7 @@ class TransactionView(APIView):
 
     def put(self, request, transaction_id, *args, **kwargs):
         """
-        Updates an existing transaction and adjusts the associated budget.
+        Update a transaction and recalculate the user's monthly budget spent amount.
         """
         try:
             transaction = Transaction.objects.get(id=transaction_id, user=request.user)
@@ -90,13 +88,12 @@ class TransactionView(APIView):
             current_year = today.year
             budget = Budget.objects.get(user=request.user, month=current_month, year=current_year)
 
-            # Roll back old amount
+            # Roll back old transaction amount
             budget.spent_amount -= transaction.amount
 
             serializer = TransactionSerializer(transaction, data=request.data, partial=True)
             if serializer.is_valid():
                 updated_transaction = serializer.save()
-                # Add new amount
                 budget.spent_amount += updated_transaction.amount
                 budget.save()
 
@@ -109,13 +106,13 @@ class TransactionView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Transaction.DoesNotExist:
-            raise NotFound(detail="Transaction not found.")
+            raise NotFound("Transaction not found.")
         except Budget.DoesNotExist:
             return Response({"detail": "No budget found for the current month."}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, transaction_id, *args, **kwargs):
         """
-        Deletes a specific transaction and adjusts the associated budget.
+        Delete a transaction and deduct its amount from the user's monthly budget spent amount.
         """
         try:
             transaction = Transaction.objects.get(id=transaction_id, user=request.user)
@@ -126,8 +123,8 @@ class TransactionView(APIView):
 
             budget.spent_amount -= transaction.amount
             budget.save()
-
             transaction.delete()
+
             return Response({
                 "detail": "Transaction deleted successfully.",
                 "spent_amount": round(budget.spent_amount, 2),
@@ -135,20 +132,20 @@ class TransactionView(APIView):
             }, status=status.HTTP_204_NO_CONTENT)
 
         except Transaction.DoesNotExist:
-            raise NotFound(detail="Transaction not found.")
+            raise NotFound("Transaction not found.")
         except Budget.DoesNotExist:
             return Response({"detail": "No budget found for the current month."}, status=status.HTTP_404_NOT_FOUND)
 
+
 class BudgetView(APIView):
     """
-    API view for managing budgets.
-    Allows for creating, retrieving, updating, and deleting budgets.
+    Create, retrieve, update, or delete budgets for the authenticated user.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, budget_id=None, *args, **kwargs):
         """
-        Retrieves a specific budget or all budgets for the authenticated user.
+        Retrieve a single budget by ID or all budgets for the authenticated user.
         """
         if budget_id:
             try:
@@ -156,7 +153,7 @@ class BudgetView(APIView):
                 serializer = BudgetSerializer(budget)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Budget.DoesNotExist:
-                raise NotFound(detail="Budget not found.")
+                raise NotFound("Budget not found.")
         else:
             budgets = Budget.objects.filter(user=request.user)
             serializer = BudgetSerializer(budgets, many=True)
@@ -164,7 +161,7 @@ class BudgetView(APIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Creates a new budget for a specific month and year.
+        Create a new budget for a given month and year for the authenticated user.
         """
         month = request.data.get('month')
         year = request.data.get('year')
@@ -174,18 +171,13 @@ class BudgetView(APIView):
         if existing_budget:
             return Response({"detail": "Budget already exists for this month/year."}, status=status.HTTP_400_BAD_REQUEST)
 
-        budget = Budget.objects.create(
-            user=request.user,
-            month=month,
-            year=year,
-            amount=amount
-        )
+        budget = Budget.objects.create(user=request.user, month=month, year=year, amount=amount)
         serializer = BudgetSerializer(budget)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def put(self, request, budget_id, *args, **kwargs):
         """
-        Updates an existing budget.
+        Update an existing budget by ID.
         """
         try:
             budget = Budget.objects.get(id=budget_id, user=request.user)
@@ -195,28 +187,30 @@ class BudgetView(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Budget.DoesNotExist:
-            raise NotFound(detail="Budget not found.")
+            raise NotFound("Budget not found.")
 
     def delete(self, request, budget_id, *args, **kwargs):
         """
-        Deletes a specific budget.
+        Delete a budget by ID.
         """
         try:
             budget = Budget.objects.get(id=budget_id, user=request.user)
             budget.delete()
             return Response({"detail": "Budget deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
         except Budget.DoesNotExist:
-            raise NotFound(detail="Budget not found.")
+            raise NotFound("Budget not found.")
+
 
 class BudgetSummaryView(APIView):
     """
-    API view to retrieve the summary of the user's budget for a specific month and year.
+    Retrieve a summary of budget vs spending for a given month and year.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         """
-        Retrieves the budget summary for a given month and year.
+        Return the total budget, amount spent, and remaining amount for a specific month and year.
+        Defaults to the current month/year if not provided.
         """
         try:
             month = int(request.query_params.get('month', datetime.today().month))
@@ -244,15 +238,16 @@ class BudgetSummaryView(APIView):
                 "remaining_amount": 0
             }, status=status.HTTP_200_OK)
 
+
 class SpendingByCategoryView(APIView):
     """
-    API view to retrieve spending data grouped by category.
+    Retrieve user's total spending grouped by transaction categories.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         """
-        Retrieves spending data grouped by transaction category.
+        Return total amount spent per category for the authenticated user.
         """
         transactions = Transaction.objects.filter(user=request.user, category__isnull=False)
 
@@ -260,23 +255,22 @@ class SpendingByCategoryView(APIView):
             return Response({"detail": "No spending data available."}, status=status.HTTP_200_OK)
 
         category_spending = defaultdict(Decimal)
-
         for txn in transactions:
             category_spending[txn.category] += txn.amount
 
         result = [{"category": k, "amount": round(v, 2)} for k, v in category_spending.items()]
-
         return Response(result, status=status.HTTP_200_OK)
+
 
 class TotalExpensesOverTimeAPIView(APIView):
     """
-    API view to retrieve the total expenses over time, grouped by month.
+    Retrieve total expenses over time (monthly) for chart visualizations.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """
-        Retrieves the total expenses over time, grouped by month and formatted as YYYY-MM.
+        Return total spending per month, formatted as 'YYYY-MM'.
         """
         expenses = (
             Transaction.objects.filter(user=request.user)
@@ -286,7 +280,6 @@ class TotalExpensesOverTimeAPIView(APIView):
             .order_by('month')
         )
 
-        # Format month as string YYYY-MM for frontend chart compatibility
         formatted = [
             {
                 "month": expense["month"].strftime("%Y-%m"),
